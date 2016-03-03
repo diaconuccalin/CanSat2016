@@ -1,18 +1,14 @@
-#include "SDFileSystem.h"
- 
-SDFileSystem sd(p5, p6, p7, p8, "sd"); // the pinout on the mbed Cool Components workshop board
- 
-int main() {
-    printf("Hello World!\n");   
- 
-    mkdir("/sd/mydir", 0777);
-    
-    FILE *fp = fopen("/sd/mydir/sdtest.txt", "w");
-    if(fp == NULL) {
-        error("Could not open file for write\n");
-    }
-    fprintf(fp, "Hello fun SD Card World!");
-    fclose(fp); 
- 
-    printf("Goodbye World!\n");
+#define SPKR 13 //this is the digital pin that you plugged the red       wire into
+
+void setup()
+{
+   pinMode(SPKR, OUTPUT); //set the speaker as output
+}
+
+void loop() //do this over and over
+{
+   digitalWrite(SPKR, HIGH); //turn the speaker on
+   delay(500);                     //wait for half a second
+   digitalWrite(SPKR, LOW); //turn the speaker off
+   delay(500);                    //wait for half a second
 }
