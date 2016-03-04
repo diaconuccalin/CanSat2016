@@ -1,3 +1,15 @@
+//temp+pres
+#include <Wire.h>
+#include <qbcan.h>
+#include <SPI.h>
+BMP180 bmp;
+
+//DHT11
+#include <dht.h>
+#define dht_apin A0
+dht DHT;
+unsigned long previousMillis = 0;
+
 //GPS
 #include <SoftwareSerial.h>
 SoftwareSerial gpsSerial(8, 9); //RX, TX (TX not used)
@@ -6,23 +18,27 @@ char sentence[sentenceSize];
 
 void setup()
 {
+  //temp+pres
+  bmp.begin();
+  
   //gps
   Serial.begin(9600);
+  delay(1000);//delay to let the system boot
   gpsSerial.begin(9600);
-  //spekaer
+  
+  //speaker
    pinMode(6, OUTPUT);
-  //curent
-   pinMode(7,OUTPUT);
-   digitalWrite(7, HIGH);
 }
 
 void loop() //do this over and over
 {
-   //speaker
-   digitalWrite(6, HIGH);
+   //temp+umidit
+   unsigned long currentMillis = millis();
+   
    //GPS
    int a, flag=0;
    static int i=0;
+   /*
    if(gpsSerial.available())
    {
     char ch = gpsSerial.read();
@@ -83,7 +99,37 @@ void loop() //do this over and over
    }
    //gps
    else
-   {}
-   //speker
+   {
+   */
+    //DHT11(temp+umid)
+    if(currentMillis-previousMillis>=2000)
+    {
+      previousMillis=currentMillis;
+      DHT.read11(dht_apin);
+
+      Serial.print("Current humidity = ");
+      Serial.print(DHT.humidity);
+      Serial.print("% temperature = ");
+      Serial.print(DHT.temperature);
+      Serial.println("C ");
+    }
+    //DHT11
+
+    //temp+pres
+    double T, P;
+    bmp.getData(T, P);
+
+    Serial.print("Pressure: ");
+    Serial.print(P, 2);
+    Serial.println(" mb.");
+    Serial.print("Temperature: ");
+    Serial.print(T, 2);
+    Serial.println(" deg C");
+    //temp+pres
+   //}
+   
+   //speaker
+   digitalWrite(6,HIGH);
+   delay(1);
    digitalWrite(6, LOW);
 }
