@@ -1,1 +1,2 @@
 http://doc.open-cosmos.com/Qbcan_user_manual
+http://forum.arduino.cc/index.php?topic=110103.0
