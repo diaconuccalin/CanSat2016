@@ -1,13 +1,13 @@
 //temp+pres
 #include <qbcan.h>
 #include <SPI.h>
+#include <Wire.h>
 BMP180 bmp;
 
 //accelerometru
 unsigned long previousMillisAcc = 0;
 int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1};
 
-#include <Wire.h>
 #include <L3G.h>
 #include <LSM303.h>
 
@@ -81,7 +81,7 @@ dht DHT;
 
 //GPS
 #include <SoftwareSerial.h>
-SoftwareSerial gpsSerial(8, 9); // RX, TX (TX not used)
+SoftwareSerial gpsSerial(9, 8); // RX, TX (TX not used)
 const int sentenceSize = 80;
 char sentence[sentenceSize];
 
@@ -94,6 +94,7 @@ void setup()
 {
   pinMode(5, OUTPUT);
   digitalWrite(5, HIGH);
+  
   //temp+pres
   bmp.begin();
   
@@ -125,9 +126,10 @@ void setup()
   timer=millis();
   delay(20);
   counter=0;
-  
+  /*
   //speaker
   pinMode(6, OUTPUT);
+  */
   //GPS
   Serial.begin(9600);
   gpsSerial.begin(9600);
@@ -140,13 +142,14 @@ void setup()
 
 void loop()
 {
+  
   //----------------------------accelerometru----------------------------
   unsigned long currentMillisAcc = millis();
   //----------------------------accelerometru----------------------------
   
   //temp+humid
   unsigned long currentMillis = millis();
-  
+
   //------------------------------GPS------------------------------
   int a, flag=0;
   static int i = 0;
@@ -255,6 +258,7 @@ void loop()
       }
     }
     //accelerometru
+    
     //temp+humid
     if(currentMillis-previousMillis>=2000) //minim 2 secunde intre citiri
     {
@@ -279,13 +283,14 @@ void loop()
     Serial.print(T,2);
     Serial.println(" deg C.");
     //temp+pres
-  }
+ }
 
-  //speaker
+/*  //speaker
   digitalWrite(6, HIGH);
   delay(1);
   digitalWrite(6,LOW);
   //speaker
+*/
 }
 
 
@@ -579,3 +584,4 @@ void Matrix_Multiply(float a[3][3], float b[3][3],float mat[3][3])
   }
 }
 //---------------------------------accelerometru---------------------------------
+
