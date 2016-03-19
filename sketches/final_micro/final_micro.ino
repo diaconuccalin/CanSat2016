@@ -81,7 +81,7 @@ dht DHT;
 
 //GPS
 #include <SoftwareSerial.h>
-SoftwareSerial gpsSerial(9, 8); // RX, TX (TX not used)
+SoftwareSerial gpsSerial(9, 7); // RX, TX (TX not used)
 const int sentenceSize = 80;
 char sentence[sentenceSize];
 
