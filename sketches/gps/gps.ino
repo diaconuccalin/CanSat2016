@@ -1,6 +1,6 @@
 //GPS
 #include <SoftwareSerial.h>
-SoftwareSerial gpsSerial(10, 11); // RX, TX (TX not used)
+SoftwareSerial gpsSerial(9, 8); // RX, TX (TX not used)
 const int sentenceSize = 80;
 char sentence[sentenceSize];
 
