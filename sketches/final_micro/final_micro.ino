@@ -1,3 +1,7 @@
+//card sd
+#include <SD.h>
+const int chipSelect = 8;
+
 //temp+pres
 #include <qbcan.h>
 #include <SPI.h>
@@ -91,10 +95,7 @@ char sentence[sentenceSize];
 
 
 void setup()
-{
-  pinMode(5, OUTPUT);
-  digitalWrite(5, HIGH);
-  
+{  
   //temp+pres
   bmp.begin();
   
@@ -133,6 +134,19 @@ void setup()
   //GPS
   Serial.begin(9600);
   gpsSerial.begin(9600);
+
+  //SD
+  while(!Serial)
+  {;}
+
+  Serial.print("Initializing SD card...");
+
+  if(!SD.begin(chipSelect))
+  {
+    Serial.println("Card failed, or not present");
+    return;
+  }
+  Serial.println("card initialized");
 }
 
 
@@ -142,6 +156,11 @@ void setup()
 
 void loop()
 {
+  //SD
+  File dataFile = SD.open("data.txt", FILE_WRITE);
+  if(dataFile)
+  {
+  //SD
   
   //----------------------------accelerometru----------------------------
   unsigned long currentMillisAcc = millis();
@@ -182,15 +201,57 @@ void loop()
       Serial.print("\n");
       
       Serial.print("Lat: ");
+
+      
+      
+      
+      dataFile.print("---------------GPS---------------\n");
+      
+      dataFile.print("GMT: ");
+      dataFile.print(sentence[7]);
+      dataFile.print(sentence[8]);
+      dataFile.print(":");
+      dataFile.print(sentence[9]);
+      dataFile.print(sentence[10]);
+      dataFile.print(":");
+      dataFile.print(sentence[11]);
+      dataFile.print(sentence[12]);
+      dataFile.print("\n");
+      
+      dataFile.print("Lat: ");
+
+
+
+      
       for(a=18; a<=26; a++)
+      {
         Serial.print(sentence[a]);
+        dataFile.print(sentence[a]);
+      }
+      
       Serial.print(" ");
       Serial.print(sentence[28]);
       Serial.print("\n");
       
       Serial.print("Long: ");
+
+
+
+      dataFile.print(" ");
+      dataFile.print(sentence[28]);
+      dataFile.print("\n");
+      
+      dataFile.print("Long: ");
+
+
+
+      
       for(a=30; a<=39; a++)
+      {
         Serial.print(sentence[a]);
+        dataFile.print(sentence[a]);
+      }
+      
       Serial.print(" ");
       Serial.print(sentence[41]);
       Serial.print("\n");
@@ -201,6 +262,23 @@ void loop()
       Serial.print("\n");
 
       Serial.print("Alt: ");
+
+
+
+      dataFile.print(" ");
+      dataFile.print(sentence[41]);
+      dataFile.print("\n");
+
+      dataFile.print("Sat: ");
+      dataFile.print(sentence[45]);
+      dataFile.print(sentence[46]);
+      dataFile.print("\n");
+
+      dataFile.print("Alt: ");
+
+
+
+      
       for(a=48; a<=60 && flag!=2; a++)
       {
         if(flag==0)
@@ -215,11 +293,15 @@ void loop()
             if(sentence[a]==',')
               flag=2;
             else
+            {
               Serial.print(sentence[a]);
+              dataFile.print(sentence[a]);
+            }
           }
         }
       }
       Serial.print(" m \n");
+      dataFile.print(" m \n");
      }
     }
   }
@@ -254,7 +336,9 @@ void loop()
       if(currentMillisAcc-previousMillisAcc>=20)
       {
         previousMillisAcc=currentMillisAcc;
+        dataFile.close();
         printdata();
+        dataFile = SD.open("data.txt", FILE_WRITE);
       }
     }
     //accelerometru
@@ -269,6 +353,14 @@ void loop()
       Serial.print("% temp=");
       Serial.print(DHT.temperature);
       Serial.print("C \n");
+
+
+
+      dataFile.print("\nhum=");
+      dataFile.print(DHT.humidity);
+      dataFile.print("% temp=");
+      dataFile.print(DHT.temperature);
+      dataFile.print("C \n");
     }
     //temp+humid
 
@@ -282,6 +374,16 @@ void loop()
     Serial.print("Temperature: ");
     Serial.print(T,2);
     Serial.println(" deg C.");
+
+
+
+    
+    dataFile.print("Pressure: ");
+    dataFile.print(P, 2);
+    dataFile.println(" mb.");
+    dataFile.print("Temperature: ");
+    dataFile.print(T,2);
+    dataFile.println(" deg C.");
     //temp+pres
  }
 
@@ -291,6 +393,14 @@ void loop()
   digitalWrite(6,LOW);
   //speaker
 */
+  //SD
+  dataFile.close();
+  }
+  else
+  {
+    Serial.println("error opening data.txt :(");
+  }
+  //SD
 }
 
 
@@ -497,7 +607,9 @@ void Euler_angles(void)
 
 void printdata(void)
 {    
+      File dataFile = SD.open("data.txt", FILE_WRITE);
       Serial.print("!");
+      dataFile.print("!");
 
       #if PRINT_EULER == 1
       Serial.print("ANG:");
@@ -506,6 +618,15 @@ void printdata(void)
       Serial.print(ToDeg(pitch));
       Serial.print(",");
       Serial.print(ToDeg(yaw));
+
+
+      
+      dataFile.print("ANG:");
+      dataFile.print(ToDeg(roll));
+      dataFile.print(",");
+      dataFile.print(ToDeg(pitch));
+      dataFile.print(",");
+      dataFile.print(ToDeg(yaw));
       #endif      
       #if PRINT_ANALOGS==1
       Serial.print(",AN:");
@@ -526,8 +647,33 @@ void printdata(void)
       Serial.print(c_magnetom_y);
       Serial.print (",");
       Serial.print(c_magnetom_z);
+
+
+
+
+      dataFile.print(",AN:");
+      dataFile.print(AN[0]);
+      dataFile.print(",");
+      dataFile.print(AN[1]);
+      dataFile.print(",");
+      dataFile.print(AN[2]);  
+      dataFile.print(",");
+      dataFile.print(AN[3]);
+      dataFile.print (",");
+      dataFile.print(AN[4]);
+      dataFile.print (",");
+      dataFile.print(AN[5]);
+      dataFile.print(",");
+      dataFile.print(c_magnetom_x);
+      dataFile.print (",");
+      dataFile.print(c_magnetom_y);
+      dataFile.print (",");
+      dataFile.print(c_magnetom_z);
       #endif
       Serial.println();
+      dataFile.println();
+
+      dataFile.close();
 }
 
 float Vector_Dot_Product(float vector1[3],float vector2[3])
