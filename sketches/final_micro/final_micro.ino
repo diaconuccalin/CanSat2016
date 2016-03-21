@@ -7,7 +7,7 @@
 #include <Wire.h>
 BMP180 bmp;
 
-//accel
+/*/accel
 int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1};
 unsigned long previousMillisAcc = 0;
 
@@ -58,7 +58,7 @@ float Temporary_Matrix[3][3]={
   ,{
     0,0,0  }
 };
-
+*/
 //temp+humid
 unsigned long previousMillis = 0;
 #include <dht.h>
@@ -68,8 +68,7 @@ dht DHT;
 //GPS
 #include <SoftwareSerial.h>
 SoftwareSerial gpsSerial(9, 7); // RX, TX (TX not used)
-const int sentenceSize = 80;
-char sentence[sentenceSize];
+char sentence[80];
 
 
 void setup()
@@ -77,7 +76,7 @@ void setup()
   //temp+pres
   bmp.begin();
   
-  //accelerometru
+  /*/accelerometru
   Wire.begin();
   delay(1500);
   Accel_Init();
@@ -105,6 +104,7 @@ void setup()
   timer=millis();
   delay(20);
   counter=0;
+  */
   /*
   //speaker
   pinMode(6, OUTPUT);
@@ -135,10 +135,10 @@ void loop()
   {
   //SD
   
-  //----------------------------accelerometru----------------------------
+  /*/----------------------------accelerometru----------------------------
   unsigned long currentMillisAcc = millis();
   //----------------------------accelerometru----------------------------
-  
+  */
   //temp+humid
   unsigned long currentMillis = millis();
 
@@ -148,7 +148,7 @@ void loop()
   if (gpsSerial.available())
   {
     char ch = gpsSerial.read();
-    if (ch != '\n' && i < sentenceSize)
+    if (ch != '\n' && i < 80)
     {
       sentence[i] = ch;
       i++;
@@ -223,7 +223,7 @@ void loop()
   //------------------------------GPS------------------------------
   else
   {
-    //acceleometru
+    /*/acceleometru
     if((millis()-timer)>=20)
     {
       counter++;
@@ -257,7 +257,7 @@ void loop()
       }
     }
     //accelerometru
-    
+    */
     //temp+humid
     if(currentMillis-previousMillis>=2000) //minim 2 secunde intre citiri
     {
@@ -303,7 +303,7 @@ void loop()
 
 
 
-
+/*
 
 
 //---------------------------------accelerometru---------------------------------
@@ -562,4 +562,4 @@ void Matrix_Multiply(float a[3][3], float b[3][3],float mat[3][3])
   }
 }
 //---------------------------------accelerometru---------------------------------
-
+*/
