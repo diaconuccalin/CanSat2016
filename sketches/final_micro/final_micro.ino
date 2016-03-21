@@ -139,7 +139,7 @@ void setup()
   while(!Serial)
   {;}
 
-  Serial.print("Initializing SD card...");
+  Serial.println("Initializing SD card...");
 
   if(!SD.begin(chipSelect))
   {
@@ -187,24 +187,6 @@ void loop()
      
      if(sentence[4]=='G')
      {
-      Serial.print("---------------GPS---------------\n");
-      
-      Serial.print("GMT: ");
-      Serial.print(sentence[7]);
-      Serial.print(sentence[8]);
-      Serial.print(":");
-      Serial.print(sentence[9]);
-      Serial.print(sentence[10]);
-      Serial.print(":");
-      Serial.print(sentence[11]);
-      Serial.print(sentence[12]);
-      Serial.print("\n");
-      
-      Serial.print("Lat: ");
-
-      
-      
-      
       dataFile.print("---------------GPS---------------\n");
       
       dataFile.print("GMT: ");
@@ -219,52 +201,19 @@ void loop()
       dataFile.print("\n");
       
       dataFile.print("Lat: ");
-
-
-
       
       for(a=18; a<=26; a++)
-      {
-        Serial.print(sentence[a]);
         dataFile.print(sentence[a]);
-      }
       
-      Serial.print(" ");
-      Serial.print(sentence[28]);
-      Serial.print("\n");
-      
-      Serial.print("Long: ");
-
-
-
       dataFile.print(" ");
       dataFile.print(sentence[28]);
       dataFile.print("\n");
       
       dataFile.print("Long: ");
 
-
-
-      
       for(a=30; a<=39; a++)
-      {
-        Serial.print(sentence[a]);
         dataFile.print(sentence[a]);
-      }
       
-      Serial.print(" ");
-      Serial.print(sentence[41]);
-      Serial.print("\n");
-
-      Serial.print("Sat: ");
-      Serial.print(sentence[45]);
-      Serial.print(sentence[46]);
-      Serial.print("\n");
-
-      Serial.print("Alt: ");
-
-
-
       dataFile.print(" ");
       dataFile.print(sentence[41]);
       dataFile.print("\n");
@@ -276,9 +225,6 @@ void loop()
 
       dataFile.print("Alt: ");
 
-
-
-      
       for(a=48; a<=60 && flag!=2; a++)
       {
         if(flag==0)
@@ -293,14 +239,10 @@ void loop()
             if(sentence[a]==',')
               flag=2;
             else
-            {
-              Serial.print(sentence[a]);
               dataFile.print(sentence[a]);
-            }
           }
         }
       }
-      Serial.print(" m \n");
       dataFile.print(" m \n");
      }
     }
@@ -348,14 +290,7 @@ void loop()
     {
       previousMillis=currentMillis;
       DHT.read11(dht_apin);
-      Serial.print("\nhum=");
-      Serial.print(DHT.humidity);
-      Serial.print("% temp=");
-      Serial.print(DHT.temperature);
-      Serial.print("C \n");
-
-
-
+      
       dataFile.print("\nhum=");
       dataFile.print(DHT.humidity);
       dataFile.print("% temp=");
@@ -367,16 +302,6 @@ void loop()
     //temp+pres
     double T, P;
     bmp.getData(T,P);
-
-    Serial.print("Pressure: ");
-    Serial.print(P, 2);
-    Serial.println(" mb.");
-    Serial.print("Temperature: ");
-    Serial.print(T,2);
-    Serial.println(" deg C.");
-
-
-
     
     dataFile.print("Pressure: ");
     dataFile.print(P, 2);
@@ -608,18 +533,9 @@ void Euler_angles(void)
 void printdata(void)
 {    
       File dataFile = SD.open("data.txt", FILE_WRITE);
-      Serial.print("!");
       dataFile.print("!");
 
       #if PRINT_EULER == 1
-      Serial.print("ANG:");
-      Serial.print(ToDeg(roll));
-      Serial.print(",");
-      Serial.print(ToDeg(pitch));
-      Serial.print(",");
-      Serial.print(ToDeg(yaw));
-
-
       
       dataFile.print("ANG:");
       dataFile.print(ToDeg(roll));
@@ -627,30 +543,10 @@ void printdata(void)
       dataFile.print(ToDeg(pitch));
       dataFile.print(",");
       dataFile.print(ToDeg(yaw));
+      
       #endif      
       #if PRINT_ANALOGS==1
-      Serial.print(",AN:");
-      Serial.print(AN[0]);
-      Serial.print(",");
-      Serial.print(AN[1]);
-      Serial.print(",");
-      Serial.print(AN[2]);  
-      Serial.print(",");
-      Serial.print(AN[3]);
-      Serial.print (",");
-      Serial.print(AN[4]);
-      Serial.print (",");
-      Serial.print(AN[5]);
-      Serial.print(",");
-      Serial.print(c_magnetom_x);
-      Serial.print (",");
-      Serial.print(c_magnetom_y);
-      Serial.print (",");
-      Serial.print(c_magnetom_z);
-
-
-
-
+      
       dataFile.print(",AN:");
       dataFile.print(AN[0]);
       dataFile.print(",");
@@ -670,7 +566,6 @@ void printdata(void)
       dataFile.print (",");
       dataFile.print(c_magnetom_z);
       #endif
-      Serial.println();
       dataFile.println();
 
       dataFile.close();
