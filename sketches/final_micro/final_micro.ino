@@ -1,16 +1,15 @@
-//card sd
+//sd
 #include <SD.h>
-const int chipSelect = 8;
 
-//temp+pres
+//tempres
 #include <qbcan.h>
 #include <SPI.h>
 #include <Wire.h>
 BMP180 bmp;
 
-//accelerometru
-unsigned long previousMillisAcc = 0;
+//accel
 int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1};
+unsigned long previousMillisAcc = 0;
 
 #include <L3G.h>
 #include <LSM303.h>
@@ -18,31 +17,14 @@ int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1};
 L3G gyro;
 LSM303 compass;
 
-#define GRAVITY 256
 #define ToRad(x) ((x)*0.01745329252)
 #define ToDeg(x) ((x)*57.2957795131)
-#define Gyro_Gain_X 0.07
-#define Gyro_Gain_Y 0.07
-#define Gyro_Gain_Z 0.07
-#define Gyro_Scaled_X(x) ((x)*ToRad(Gyro_Gain_X))
-#define Gyro_Scaled_Y(x) ((x)*ToRad(Gyro_Gain_Y))
-#define Gyro_Scaled_Z(x) ((x)*ToRad(Gyro_Gain_Z))
-#define M_X_MIN -421
-#define M_Y_MIN -639
-#define M_Z_MIN -238
-#define M_X_MAX 424
-#define M_Y_MAX 295
-#define M_Z_MAX 472
-#define Kp_ROLLPITCH 0.02
-#define Ki_ROLLPITCH 0.00002
-#define Kp_YAW 1.2
-#define Ki_YAW 0.00002
-#define OUTPUTMODE 1
-#define PRINT_ANALOGS 0
-#define PRINT_EULER 1
+#define Gyro_Scaled_X(x) ((x)*ToRad(0.07))
+#define Gyro_Scaled_Y(x) ((x)*ToRad(0.07))
+#define Gyro_Scaled_Z(x) ((x)*ToRad(0.07))
 
 float G_Dt=0.02;
-long timer=0, timer_old, timer24=0;
+unsigned long timer=0, timer_old, timer24=0;
 int AN[6], AN_OFFSET[6]={0,0,0,0,0,0};
 
 int gyro_x, gyro_y, gyro_z, accel_x, accel_y, accel_z, magnetom_x, magnetom_y, magnetom_z;
@@ -90,10 +72,6 @@ const int sentenceSize = 80;
 char sentence[sentenceSize];
 
 
-
-
-
-
 void setup()
 {  
   //temp+pres
@@ -120,7 +98,7 @@ void setup()
   for(int y=0; y<6; y++)
     AN_OFFSET[y] = AN_OFFSET[y]/32;
 
-  AN_OFFSET[5]-=GRAVITY*SENSOR_SIGN[5];
+  AN_OFFSET[5]-=256*SENSOR_SIGN[5];
 
   delay(2000);
 
@@ -141,18 +119,13 @@ void setup()
 
   Serial.println("Initializing SD card...");
 
-  if(!SD.begin(chipSelect))
+  if(!SD.begin(8))
   {
     Serial.println("Card failed, or not present");
     return;
   }
   Serial.println("card initialized");
 }
-
-
-
-
-
 
 void loop()
 {
@@ -408,9 +381,9 @@ void Compass_Heading()
   cos_pitch = cos(pitch);
   sin_pitch = sin(pitch);
   
-  c_magnetom_x = (float)(magnetom_x - SENSOR_SIGN[6]*M_X_MIN) / (M_X_MAX - M_X_MIN) - SENSOR_SIGN[6]*0.5;
-  c_magnetom_y = (float)(magnetom_y - SENSOR_SIGN[7]*M_Y_MIN) / (M_Y_MAX - M_Y_MIN) - SENSOR_SIGN[7]*0.5;
-  c_magnetom_z = (float)(magnetom_z - SENSOR_SIGN[8]*M_Z_MIN) / (M_Z_MAX - M_Z_MIN) - SENSOR_SIGN[8]*0.5;
+  c_magnetom_x = (float)(magnetom_x - SENSOR_SIGN[6]*(-421)) / (424 - (-421)) - SENSOR_SIGN[6]*0.5;
+  c_magnetom_y = (float)(magnetom_y - SENSOR_SIGN[7]*(-639)) / (295 - (-639)) - SENSOR_SIGN[7]*0.5;
+  c_magnetom_z = (float)(magnetom_z - SENSOR_SIGN[8]*(-238)) / (472 - (-238)) - SENSOR_SIGN[8]*0.5;
   
   MAG_X = c_magnetom_x*cos_pitch+c_magnetom_y*sin_roll*sin_pitch+c_magnetom_z*cos_roll*sin_pitch;
   MAG_Y = c_magnetom_y*cos_roll-c_magnetom_z*sin_roll;
@@ -429,8 +402,7 @@ void Matrix_update(void)
 
   Vector_Add(&Omega[0], &Gyro_Vector[0], &Omega_I[0]);
   Vector_Add(&Omega_Vector[0], &Omega[0], &Omega_P[0]);
-
-  #if OUTPUTMODE==1         
+       
   Update_Matrix[0][0]=0;
   Update_Matrix[0][1]=-G_Dt*Omega_Vector[2];
   Update_Matrix[0][2]=G_Dt*Omega_Vector[1];
@@ -440,18 +412,7 @@ void Matrix_update(void)
   Update_Matrix[2][0]=-G_Dt*Omega_Vector[1];
   Update_Matrix[2][1]=G_Dt*Omega_Vector[0];
   Update_Matrix[2][2]=0;
-  #else
-  Update_Matrix[0][0]=0;
-  Update_Matrix[0][1]=-G_Dt*Gyro_Vector[2];
-  Update_Matrix[0][2]=G_Dt*Gyro_Vector[1];
-  Update_Matrix[1][0]=G_Dt*Gyro_Vector[2];
-  Update_Matrix[1][1]=0;
-  Update_Matrix[1][2]=-G_Dt*Gyro_Vector[0];
-  Update_Matrix[2][0]=-G_Dt*Gyro_Vector[1];
-  Update_Matrix[2][1]=G_Dt*Gyro_Vector[0];
-  Update_Matrix[2][2]=0;
- #endif
-
+  
   Matrix_Multiply(DCM_Matrix,Update_Matrix,Temporary_Matrix);
 
   for(int x=0; x<3; x++)
@@ -501,14 +462,14 @@ void Drift_correction(void)
   float Accel_weight;
   
   Accel_magnitude = sqrt(Accel_Vector[0]*Accel_Vector[0] + Accel_Vector[1]*Accel_Vector[1] + Accel_Vector[2]*Accel_Vector[2]);
-  Accel_magnitude = Accel_magnitude / GRAVITY;
+  Accel_magnitude = Accel_magnitude / 256;
   
   Accel_weight = constrain(1 - 2*abs(1 - Accel_magnitude),0,1); 
 
   Vector_Cross_Product(&errorRollPitch[0],&Accel_Vector[0],&DCM_Matrix[2][0]);
-  Vector_Scale(&Omega_P[0],&errorRollPitch[0],Kp_ROLLPITCH*Accel_weight);
+  Vector_Scale(&Omega_P[0],&errorRollPitch[0],0.02*Accel_weight);
   
-  Vector_Scale(&Scaled_Omega_I[0],&errorRollPitch[0],Ki_ROLLPITCH*Accel_weight);
+  Vector_Scale(&Scaled_Omega_I[0],&errorRollPitch[0],0.00002*Accel_weight);
   Vector_Add(Omega_I,Omega_I,Scaled_Omega_I);     
   
   mag_heading_x = cos(MAG_Heading);
@@ -516,10 +477,10 @@ void Drift_correction(void)
   errorCourse=(DCM_Matrix[0][0]*mag_heading_y) - (DCM_Matrix[1][0]*mag_heading_x);
   Vector_Scale(errorYaw,&DCM_Matrix[2][0],errorCourse); 
   
-  Vector_Scale(&Scaled_Omega_P[0],&errorYaw[0],Kp_YAW);
+  Vector_Scale(&Scaled_Omega_P[0],&errorYaw[0],1.2);
   Vector_Add(Omega_P,Omega_P,Scaled_Omega_P);
   
-  Vector_Scale(&Scaled_Omega_I[0],&errorYaw[0],Ki_YAW);
+  Vector_Scale(&Scaled_Omega_I[0],&errorYaw[0],0.00002);
   Vector_Add(Omega_I,Omega_I,Scaled_Omega_I);
 }
 
@@ -535,37 +496,13 @@ void printdata(void)
       File dataFile = SD.open("data.txt", FILE_WRITE);
       dataFile.print("!");
 
-      #if PRINT_EULER == 1
-      
       dataFile.print("ANG:");
       dataFile.print(ToDeg(roll));
       dataFile.print(",");
       dataFile.print(ToDeg(pitch));
       dataFile.print(",");
       dataFile.print(ToDeg(yaw));
-      
-      #endif      
-      #if PRINT_ANALOGS==1
-      
-      dataFile.print(",AN:");
-      dataFile.print(AN[0]);
-      dataFile.print(",");
-      dataFile.print(AN[1]);
-      dataFile.print(",");
-      dataFile.print(AN[2]);  
-      dataFile.print(",");
-      dataFile.print(AN[3]);
-      dataFile.print (",");
-      dataFile.print(AN[4]);
-      dataFile.print (",");
-      dataFile.print(AN[5]);
-      dataFile.print(",");
-      dataFile.print(c_magnetom_x);
-      dataFile.print (",");
-      dataFile.print(c_magnetom_y);
-      dataFile.print (",");
-      dataFile.print(c_magnetom_z);
-      #endif
+     
       dataFile.println();
 
       dataFile.close();
