@@ -1,1 +1,3 @@
 http://doc.open-cosmos.com/Qbcan_user_manual
+https://github.com/LowPowerLab/RFM12B
+https://github.com/LowPowerLab/RFM12B
