@@ -1,3 +1,6 @@
+//radio
+#include <RFM69.h>
+
 //sd
 #include <SD.h>
 
