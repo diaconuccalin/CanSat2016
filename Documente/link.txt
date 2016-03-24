@@ -1,3 +1,7 @@
 http://doc.open-cosmos.com/Qbcan_user_manual
+<<<<<<< HEAD
 https://github.com/LowPowerLab/RFM12B
 https://github.com/LowPowerLab/RFM12B
+=======
+http://forum.arduino.cc/index.php?topic=110103.0
+>>>>>>> origin/master

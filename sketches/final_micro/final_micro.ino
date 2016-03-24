@@ -10,6 +10,8 @@
 #include <Wire.h>
 BMP180 bmp;
 
+<<<<<<< HEAD
+=======
 /*/accel
 int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1};
 unsigned long previousMillisAcc = 0;
@@ -74,10 +76,13 @@ SoftwareSerial gpsSerial(9, 7); // RX, TX (TX not used)
 char sentence[80];
 
 
+>>>>>>> 387320f574f8ba8f5f3e8b936d95b204bb287ada
 void setup()
 {  
   //temp+pres
   bmp.begin();
+<<<<<<< HEAD
+=======
   
   /*/accelerometru
   Wire.begin();
@@ -128,10 +133,24 @@ void setup()
     return;
   }
   Serial.println("card initialized");
+>>>>>>> 387320f574f8ba8f5f3e8b936d95b204bb287ada
 }
 
 void loop()
 {
+<<<<<<< HEAD
+    //temp+pres
+    double T, P;
+    bmp.getData(T, P);
+
+    Serial.print("Pressure: ");
+    Serial.print(P, 2);
+    Serial.println(" mb.");
+    Serial.print("Temperature: ");
+    Serial.print(T, 2);
+    Serial.println(" deg C");
+    //temp+pres   
+=======
   //SD
   File dataFile = SD.open("data.txt", FILE_WRITE);
   if(dataFile)
@@ -563,6 +582,7 @@ void Matrix_Multiply(float a[3][3], float b[3][3],float mat[3][3])
       float test=mat[x][y];
     }
   }
+>>>>>>> 387320f574f8ba8f5f3e8b936d95b204bb287ada
 }
 //---------------------------------accelerometru---------------------------------
 */
